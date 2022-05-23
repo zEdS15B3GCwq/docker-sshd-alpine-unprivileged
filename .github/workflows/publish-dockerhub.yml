@@ -1,0 +1,73 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Publish Docker image
+
+# Controls when the workflow will run
+on:
+  # Build once every Monday (to keep up-to-date)
+  schedule:
+    - cron: '0 0 * * 1'
+    
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [published]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  push_to_registry:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: ${{ secrets.DOCKER_HUB_USERNAME }}/sshd-alpine-unprivileged
+          
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+          
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/sshd-alpine-unprivileged:latest
+#          tags: ${{ steps.meta.outputs.tags }}
+#          labels: ${{ steps.meta.outputs.labels }}          
+          
+      - name: meta output
+        run: |
+          echo ${{ steps.meta.outputs.tags}}
+          echo ${{ steps.meta.outpus.labels }}
+
+       # Runs a single command using the runners shell
+#      - name: Run a one-line script
+#        run: echo ${{ steps.meta.
+
+      # Runs a set of commands using the runners shell
+#      - name: Run a multi-line script
+#        run: |
+#          echo Add other actions to build,
+#          echo test, and deploy your project.
