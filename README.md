@@ -57,7 +57,7 @@ docker run --rm -d -p 2222:22 -v `pwd`/backup:/backup tomzi/sshd-alpine-unprivil
 Build:
 
 ```
-docker build --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -t sshd-alpine-unprivileged:latest .
+docker build -t sshd-alpine-unprivileged:latest .
 ```
 
 ## Acknowledgments:
