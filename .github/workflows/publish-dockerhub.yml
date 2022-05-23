@@ -2,6 +2,9 @@
 
 name: Publish Docker image
 
+env:
+  IMAGE_NAME: sshd-alpine-unprivileged
+
 # Controls when the workflow will run
 on:
   # Build once every Monday (to keep up-to-date)
@@ -11,12 +14,9 @@ on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
     branches: [ main ]
-    tags:
-      - 'v*'
+    tags: [ 'v*.*.*' ]
   pull_request:
     branches: [ main ]
-  release:
-    types: [published]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -42,7 +42,7 @@ jobs:
 #        id: meta
 #        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
 #        with:
-#          images: ${{ secrets.DOCKER_HUB_USERNAME }}/sshd-alpine-unprivileged
+#          images: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}
           
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
@@ -52,8 +52,12 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
+          builder: ${{ steps.buildx.outputs.name }}
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/sshd-alpine-unprivileged:latest
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
+
 #          tags: ${{ steps.meta.outputs.tags }}
 #          labels: ${{ steps.meta.outputs.labels }}          
           
