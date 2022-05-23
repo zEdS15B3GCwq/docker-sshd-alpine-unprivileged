@@ -20,7 +20,7 @@ Example use case: deployed on a *TrueNAS Scale* server for some CLI activities t
 - Build:
 
 ```
-docker build --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -t sshd-unprivileged:latest .
+docker build --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -t sshd-alpine-unprivileged:latest .
 ```
 
 - Run (default settings):
@@ -34,7 +34,7 @@ Creates host keys, a user named `user` with IDs 2000:2000, RSA and ED25519 keys 
 - Run (change user id and group id, backup folder):
 
 ```
-docker run --rm -d -p 2222:22 -v `pwd`/../backup:/config tomzi/ -e USER_UID=3000 -e USER_GID=3000 -e BACKUP_FOLDER=/config sshd-alpine-unprivileged:latest
+docker run --rm -d -p 2222:22 -v `pwd`/backup:/config tomzi/ -e USER_UID=3000 -e USER_GID=3000 -e BACKUP_FOLDER=/config sshd-alpine-unprivileged:latest
 ```
 
 This uses a different UID, GID and backup folder path.
