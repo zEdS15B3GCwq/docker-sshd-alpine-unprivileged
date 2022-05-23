@@ -15,15 +15,7 @@ Example use case: deployed on a *TrueNAS Scale* server for some CLI activities t
 - Host and user keys are copied to `$BACKUP_FOLDER` folder, if mounted in.
 - If backup is present in `$BACKUP_FOLDER`, keys are copied to relevant locations instead of generating new ones.
 
-## How to use
-
-- Build:
-
-```
-docker build --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -t sshd-alpine-unprivileged:latest .
-```
-
-- Run (default settings):
+## Basic usage
 
 ```
 docker run --rm -d -p 2222:22 -v `pwd`/backup:/backup tomzi/sshd-alpine-unprivileged:latest
@@ -31,24 +23,36 @@ docker run --rm -d -p 2222:22 -v `pwd`/backup:/backup tomzi/sshd-alpine-unprivil
 
 Creates host keys, a user named `user` with IDs 2000:2000, RSA and ED25519 keys for user, and stores keys in `/backup`. Container can be accessed via SSH on port 2222, with private keys in `backup/home/user/.ssh`. Password and Root access is disabled. Mounted backup folder can be a *volume*, *bind mount*, etc. Subsequent runs of the container can use the same command line; keys are not generated again but taken from the backup folder.
 
-- Run (change user id and group id, backup folder):
+## Customisation:
+
+### Runtime environment variables:
+
+1. USER_UID, USER_GID: Create user `user` with these uid and gid.
+2. BACKUP_DIR: where the backup target is mounted
+
+These are used by the *entrypoint* script on the first run.
 
 ```
 docker run --rm -d -p 2222:22 -v `pwd`/backup:/config tomzi/ -e USER_UID=3000 -e USER_GID=3000 -e BACKUP_FOLDER=/config sshd-alpine-unprivileged:latest
 ```
 
-This uses a different UID, GID and backup folder path.
+Specifies a different UID, GID and backup folder path.
 
-## Environment variables:
+### Runtime SSHd parameters
 
-1. USER_UID, USER_GID: Create user `user` with these uid and gid.
-2. BACKUP_DIR: where the backup target is mounted
+Parameters can be passed to `sshd` on run.
 
-These are used by the *entrypoint* script to create a new user and backup keys on the first run.
+```
+docker run --rm -d -p 2222:22 -v `pwd`/backup:/backup tomzi/sshd-alpine-unprivileged:latest -o LogLevel=DEBUG
+```
 
-## Access to generated keys:
+## Develop:
 
-Keys can be grabbed either from the backup folder (e.g. ./backup/home/user/.ssh), copied with `docker cp` from running container etc.
+Build:
+
+```
+docker build --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -t sshd-alpine-unprivileged:latest .
+```
 
 ## Acknowledgments:
 
