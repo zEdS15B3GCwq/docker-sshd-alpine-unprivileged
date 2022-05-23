@@ -23,6 +23,12 @@ docker run --rm -d -p 2222:22 -v `pwd`/backup:/backup tomzi/sshd-alpine-unprivil
 
 Creates host keys, a user named `user` with IDs 2000:2000, RSA and ED25519 keys for user, and stores keys in `/backup`. Container can be accessed via SSH on port 2222, with private keys in `backup/home/user/.ssh`. Password and Root access is disabled. Mounted backup folder can be a *volume*, *bind mount*, etc. Subsequent runs of the container can use the same command line; keys are not generated again but taken from the backup folder.
 
+```
+ssh user@localhost -p 2222 -i backup/home/user/.ssh/user_ed25519
+```
+
+Connects to SSH server using private key from backup folder. Note that the owner of the key files is *root* and it has access rights 600; change ownership etc. if above command is not run as *root*.
+
 ## Customisation:
 
 ### Runtime environment variables:
